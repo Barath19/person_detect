@@ -13,6 +13,7 @@ from metrics_refbox_msgs.msg import PersonDetectionResult
 from metrics_refbox_msgs.msg import Command
 import pandas as pd
 import copy
+import rospkg
 import numpy as np
 from persondetector import detect
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -39,27 +40,37 @@ class PersonDetector:
         self.cv_bridge = CvBridge()
         self.person_flag = False
         self.image_sub = None
+        
+        
+        # yolo model config
+        #self.model_name = 'best_overfit.pt'
+        self.model_name_og = 'yolov7.pt'
+        self.confidence_threshold = 0.5
 
 
     def detector(self):
         self.img = self.image_queue[0]
         rospy.loginfo("Running detector..")
-
+        rospack = rospkg.RosPack()
+        
+        # get the file path for object_detection package
+        pkg_path = rospack.get_path('person_detect')
+        model_path = pkg_path + "/models/"
+        
+        
         result = PersonDetectionResult()
         result.message_type = result.RESULT
         predictions = {}
 
-        rospy.loginfo("entering detection in detect function")
-        weight = '/home/barath/ros1/workspace/src/person_detect/scripts/weights/yolov7.pt'
+        weight = model_path + self.model_name_og 
         person = detect(weight, self.img) 
 
 
         rospy.loginfo("publishing detection..")
         if bool(person):
-            print("using yolo model")
             # img = cv2.imread(os.path.join(self.sample_images_path, 'image.jpg'), cv2.IMREAD_COLOR)
 
-            if person['conf'] > 0.5:
+            if person['conf'] > self.confidence_threshold:
                 result.person_found = True
 
                 predictions['boxes'] = (person['xmin'], person['ymin'],
