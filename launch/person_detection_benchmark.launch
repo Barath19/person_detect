@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- launching object detection benchmark node -->
+    <node pkg="person_detect" type="yolov7_persondetection.py" name="person_detection_node" output="screen">
+    </node>
+
+    <!-- launching metrics refbox client node -->
+    <include file="$(find metrics_refbox_client)/launch/metrics_refbox_client.launch" />
+
+
+</launch>
