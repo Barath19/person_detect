@@ -3,7 +3,7 @@
 import pdb
 import sys
 import os
-import uuid import
+import uuid
 import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
