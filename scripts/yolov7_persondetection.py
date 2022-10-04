@@ -3,9 +3,9 @@
 import pdb
 import sys
 import os
-import torch
+import uuid import
 import rospy
-from sensor_msgs.msg import Image, CameraInfo
+from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import matplotlib.pyplot as plt
@@ -16,14 +16,11 @@ import copy
 import rospkg
 import numpy as np
 from persondetector import detect
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(SCRIPT_DIR))
-# importing Yolov5 model
-import pdb
-
 #IMAGE_TOPIC = "/hsrb/head_rgbd_sensor/rgb/image_raw"
 #IMAGE_TOPIC = "/camera/rgb/image_raw"
-IMAGE_TOPIC="/camera/color/image_raw"
+IMAGE_TOPIC = "/camera/color/image_raw"
+
+
 class PersonDetector:
     def __init__(self):
         self.bounding_box = 0
@@ -35,36 +32,37 @@ class PersonDetector:
         self.referee_command_sub = rospy.Subscriber(
             "/metrics_refbox_client/command", Command, self._referee_command_cb)
 
-        rospy.loginfo("[Person Detection] Waiting for referee box to be ready...")
+        rospy.loginfo(
+            "🗣 [Person Detection] Waiting for referee box to be ready...")
         self.stop_sub_flag = False
         self.cv_bridge = CvBridge()
         self.person_flag = False
         self.image_sub = None
-        
-        
+
         # yolo model config
         #self.model_name = 'best_overfit.pt'
         self.model_name_og = 'yolov7.pt'
         self.confidence_threshold = 0.5
 
-
     def detector(self):
         self.img = self.image_queue[0]
         rospy.loginfo("Running detector..")
         rospack = rospkg.RosPack()
-        
+
         # get the file path for object_detection package
         pkg_path = rospack.get_path('person_detect')
         model_path = pkg_path + "/models/"
-        
-        
+
+        # generate a unique id
+
+        cv2.imwrite(
+            f'{pkg_path}/run_images/images_{str(uuid.uuid4())}', self.img)
+
         result = PersonDetectionResult()
         result.message_type = result.RESULT
         predictions = {}
-
-        weight = model_path + self.model_name_og 
-        person = detect(weight, self.img) 
-
+        weight = model_path + self.model_name_og
+        person = detect(weight, self.img)
 
         rospy.loginfo("publishing detection..")
         if bool(person):
@@ -98,20 +96,16 @@ class PersonDetector:
                 self.img, encoding='passthrough')
             self.bb_pub.publish(result)
 
-
         self.stop_sub_flag = False
         self.image_queue = []
 
         return predictions
 
-        
     def _input_image_cb(self, msg):
         """
         :msg: sensor_msgs.Image
         :returns: None
         """
-        rospy.loginfo("type of msg: {}".format(type(msg)))
-
         try:
             # if not self.stop_sub_flag:
             rospy.loginfo("Image received..")
@@ -120,9 +114,8 @@ class PersonDetector:
                 self.image_queue = []
             self.image_queue.append(cv_image)
             print("Counter: ", len(self.image_queue))
-            print("length of queue: ", len(self.image_queue))
             if len(self.image_queue) == self.clip_size:
-    
+
                 self.stop_sub_flag = True
                 rospy.loginfo("Input images saved on local drive")
                 self.image_sub.unregister()
@@ -130,8 +123,6 @@ class PersonDetector:
                 result = self.detector()
                 self.stop_sub_flag = False
                 print(result)
-        # else:
-            #     print("Clip size reached")
 
         except CvBridgeError as e:
             rospy.logerr(
@@ -156,8 +147,8 @@ class PersonDetector:
             print("\nStart command received")
 
             self.image_sub = rospy.Subscriber(IMAGE_TOPIC,
-                                               Image,
-                                               self._input_image_cb)
+                                              Image,
+                                              self._input_image_cb)
 
             print("\n")
             print("Initiating person detection - Heartmet")
