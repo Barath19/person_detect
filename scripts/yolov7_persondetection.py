@@ -16,8 +16,9 @@ import rospkg
 import numpy as np
 from persondetector import detect
 #IMAGE_TOPIC = "/hsrb/head_rgbd_sensor/rgb/image_raw"
-#IMAGE_TOPIC = "/camera/rgb/image_raw"
-IMAGE_TOPIC = "/camera/color/image_raw"
+IMAGE_TOPIC = "/camera/color/image_raw" #REALSENSE CAMERA
+#IMAGE_TOPIC = "/camera/rgb/image_raw" #ASUS CAMERA
+#IMAGE_TOPIC = "/xtion/rgb/image_raw" #TIAGO
 
 
 class PersonDetector:
@@ -40,7 +41,7 @@ class PersonDetector:
 
         # yolo model config
         #self.model_name = 'best_overfit.pt'
-        self.model_name_og = 'yolov7.pt'
+        self.model_name_og = 'yolov7x.pt'
         self.confidence_threshold = 0.5
 
     def detector(self):
@@ -50,12 +51,10 @@ class PersonDetector:
 
         # get the file path for object_detection package
         pkg_path = rospack.get_path('person_detect')
-        model_path = pkg_path + "/model/"+self.model_name_og
+        model_path = pkg_path + "/models/"
 
         # generate a unique id
 
-        cv2.imwrite(
-            f'{pkg_path}/run_images/images_{str(uuid.uuid4())}', self.img)
 
         result = PersonDetectionResult()
         result.message_type = result.RESULT
