@@ -16,9 +16,9 @@ import rospkg
 import numpy as np
 from persondetector import detect
 #IMAGE_TOPIC = "/hsrb/head_rgbd_sensor/rgb/image_raw"
-IMAGE_TOPIC = "/camera/color/image_raw" #REALSENSE CAMERA
-#IMAGE_TOPIC = "/camera/rgb/image_raw" #ASUS CAMERA
-#IMAGE_TOPIC = "/xtion/rgb/image_raw" #TIAGO
+IMAGE_TOPIC = "/camera/color/image_raw"  # REALSENSE CAMERA
+# IMAGE_TOPIC = "/camera/rgb/image_raw" #ASUS CAMERA
+# IMAGE_TOPIC = "/xtion/rgb/image_raw" #TIAGO
 
 
 class PersonDetector:
@@ -54,7 +54,6 @@ class PersonDetector:
         model_path = pkg_path + "/models/"
 
         # generate a unique id
-
 
         result = PersonDetectionResult()
         result.message_type = result.RESULT
