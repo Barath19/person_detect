@@ -8,7 +8,6 @@ import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
-import matplotlib.pyplot as plt
 from metrics_refbox_msgs.msg import PersonDetectionResult
 from metrics_refbox_msgs.msg import Command
 import pandas as pd
@@ -51,7 +50,7 @@ class PersonDetector:
 
         # get the file path for object_detection package
         pkg_path = rospack.get_path('person_detect')
-        model_path = pkg_path + "/models/"
+        model_path = pkg_path + "/model/"+self.model_name_og
 
         # generate a unique id
 
