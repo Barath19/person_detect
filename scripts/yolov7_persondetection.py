@@ -42,7 +42,7 @@ class PersonDetector:
         # yolo model config
         #self.model_name = 'best_overfit.pt'
         self.model_name_og = 'yolov7x.pt'
-        self.confidence_threshold = 0.5
+        self.confidence_threshold = 0.3
 
     def detector(self):
         self.img = self.image_queue[0]
